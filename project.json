@@ -1,0 +1,25 @@
+{
+  "overview": "Professional, bilingual (English/Hindi) responsive website for Mumbai Clinic (Dr. Atul Mashru) — a LGBTQ+ friendly medical clinic in Girgaon, Mumbai. Features a hero section with rating badge, services overview, patient testimonials, and a contact form.",
+  "features": [
+    "Bilingual English/Hindi toggle",
+    "4.5-star rating display with 85 reviews",
+    "Services overview with icon cards",
+    "Patient testimonials section",
+    "Contact form with success feedback",
+    "Clickable phone and WhatsApp links",
+    "Sticky navigation with mobile hamburger menu",
+    "LGBTQ+ friendly badge",
+    "Google Maps address link",
+    "Responsive layout for all screen sizes"
+  ],
+  "category": "healthcare",
+  "tags": [
+    "clinic",
+    "medical",
+    "healthcare",
+    "mumbai",
+    "bilingual",
+    "responsive"
+  ],
+  "last_updated": "2026-04-14T13:54:14.314Z"
+}
