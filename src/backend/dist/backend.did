@@ -1,2 +1,8 @@
+type ChatMessage = 
+ record {
+   content: text;
+   role: text;
+ };
 service : {
+  sendChatMessage: (messages: vec ChatMessage) -> (text);
 }

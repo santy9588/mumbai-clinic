@@ -1,153 +1,79 @@
-import { useLang } from "@/context/LanguageContext";
-import { Clock, Globe, MapPin, Phone } from "lucide-react";
-
-const rainbowColors = [
-  "#E40303",
-  "#FF8C00",
-  "#FFED00",
-  "#008026",
-  "#004DFF",
-  "#750787",
+const FOOTER_LEFT = [
+  { label: "About", href: "#" },
+  { label: "Advertising", href: "#" },
+  { label: "Business", href: "#" },
+  { label: "How Search works", href: "#" },
 ];
 
-export function Footer() {
-  const { t, lang } = useLang();
+const FOOTER_RIGHT = [
+  { label: "Privacy", href: "#" },
+  { label: "Terms", href: "#" },
+  { label: "Settings", href: "#" },
+];
+
+interface FooterProps {
+  variant?: "home" | "inner";
+}
+
+export function Footer({ variant = "inner" }: FooterProps) {
+  const isHome = variant === "home";
   const caffeineUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
     typeof window !== "undefined" ? window.location.hostname : "",
   )}`;
 
   return (
     <footer
-      className="bg-card border-t border-border"
+      className={`w-full border-t border-border ${isHome ? "bg-g-light" : "bg-muted"}`}
       data-ocid="footer.section"
     >
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand + tagline */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">
-                  +
-                </span>
-              </div>
-              <div>
-                <p className="font-display font-bold text-foreground text-base leading-none">
-                  {lang === "hi" ? "मुंबई क्लीनिक" : "Mumbai Clinic"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {lang === "hi" ? "डॉ. अतुल माशरू" : "Dr. Atul Mashru"}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">{t.footer.tagline}</p>
+      {/* Country row */}
+      <div
+        className={`px-4 md:px-8 py-3 border-b border-border ${isHome ? "bg-g-light" : "bg-muted"}`}
+      >
+        <span className="text-sm text-g-gray">India</span>
+      </div>
+
+      {/* Links row */}
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-8 py-3 gap-2">
+        <nav
+          className="flex flex-wrap items-center gap-4"
+          aria-label="Footer navigation"
+        >
+          {FOOTER_LEFT.map((link) => (
             <a
-              href="https://mumbaiclinic.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-ocid="footer.website_link"
-              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              key={link.label}
+              href={link.href}
+              className="text-sm text-g-gray hover:text-foreground hover:underline transition-smooth"
+              data-ocid={`footer.${link.label.toLowerCase().replace(/\s+/g, "_")}.link`}
             >
-              <Globe className="w-3.5 h-3.5" />
-              mumbaiclinic.com
+              {link.label}
             </a>
-          </div>
-
-          {/* Contact info */}
-          <div className="space-y-4">
-            <h3 className="font-display font-semibold text-foreground text-sm uppercase tracking-wide">
-              {lang === "hi" ? "संपर्क जानकारी" : "Contact Information"}
-            </h3>
-            <div className="space-y-3">
-              <div className="flex gap-2.5">
-                <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {t.footer.address}
-                </p>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-accent shrink-0" />
-                <a
-                  href="tel:+918080713636"
-                  data-ocid="footer.phone_link"
-                  className="text-sm text-primary hover:underline font-medium"
-                >
-                  {t.footer.phone}
-                </a>
-              </div>
-              <div className="flex gap-2.5">
-                <Clock className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                <div className="text-sm text-muted-foreground space-y-0.5">
-                  <p>
-                    {lang === "hi"
-                      ? "सोम–शनि: 10:00 – 14:00 और 17:00 – 21:00"
-                      : "Mon–Sat: 10 am–2 pm & 5 pm–9 pm"}
-                  </p>
-                  <p>
-                    {lang === "hi" ? "रवि: अपॉइंटमेंट पर" : "Sun: By Appointment"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* LGBTQ+ badge */}
-          <div className="space-y-4">
-            <h3 className="font-display font-semibold text-foreground text-sm uppercase tracking-wide">
-              {lang === "hi" ? "हमारी प्रतिबद्धता" : "Our Commitment"}
-            </h3>
-            <div
-              data-ocid="footer.lgbtq_badge"
-              className="inline-flex items-center gap-3 px-4 py-3 bg-background rounded-2xl border border-border shadow-subtle"
-            >
-              {/* Rainbow flag icon */}
-              <div className="flex flex-col gap-px w-7 overflow-hidden rounded-sm shrink-0">
-                {rainbowColors.map((c) => (
-                  <div
-                    key={c}
-                    className="h-1.5 w-full"
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-foreground">
-                  {t.footer.lgbtqFriendly}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {lang === "hi"
-                    ? "सभी का स्वागत है"
-                    : "Everyone is welcome here"}
-                </p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
-              {lang === "hi"
-                ? "हम सभी पृष्ठभूमि और पहचान के रोगियों का स्वागत करते हैं। आपकी देखभाल हमारी प्राथमिकता है।"
-                : "We welcome patients of all backgrounds and identities. Your care is our priority."}
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>
-            {t.footer.copyright}{" "}
+          ))}
+        </nav>
+        <nav
+          className="flex flex-wrap items-center gap-4"
+          aria-label="Footer legal navigation"
+        >
+          {FOOTER_RIGHT.map((link) => (
             <a
-              href={caffeineUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              key={link.label}
+              href={link.href}
+              className="text-sm text-g-gray hover:text-foreground hover:underline transition-smooth"
+              data-ocid={`footer.${link.label.toLowerCase()}.link`}
             >
-              caffeine.ai
+              {link.label}
             </a>
-          </p>
-          <p className="text-center sm:text-right">
-            {lang === "hi"
-              ? "429 राजा राम मोहन रॉय मार्ग, गिरगांव, मुंबई 400004"
-              : "429 Raja Ram Mohan Roy Rd, Girgaon, Mumbai 400004"}
-          </p>
-        </div>
+          ))}
+          <a
+            href={caffeineUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-muted-foreground hover:text-foreground transition-smooth"
+            data-ocid="footer.caffeine.link"
+          >
+            Built with caffeine.ai
+          </a>
+        </nav>
       </div>
     </footer>
   );

@@ -7,5 +7,10 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface ChatMessage {
+    content: string;
+    role: string;
+}
 export interface backendInterface {
+    sendChatMessage(messages: Array<ChatMessage>): Promise<string>;
 }

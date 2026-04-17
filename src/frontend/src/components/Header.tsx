@@ -1,186 +1,254 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useLang } from "@/context/LanguageContext";
-import { Menu, Phone, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Grid3X3, Menu, Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-const navIds = [
-  { key: "home" as const, href: "#home" },
-  { key: "services" as const, href: "#services" },
-  { key: "reviews" as const, href: "#reviews" },
-  { key: "contact" as const, href: "#contact" },
+const NAV_LINKS = [
+  { label: "Gmail", path: "/mail" },
+  { label: "Maps", path: "/maps" },
+  { label: "News", path: "/news" },
+  { label: "Chat", path: "/chat" },
 ];
 
-export function Header() {
-  const { t, lang, toggleLang } = useLang();
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+const ALL_APPS = [
+  { label: "Mail", path: "/mail", emoji: "✉️" },
+  { label: "Maps", path: "/maps", emoji: "🗺️" },
+  { label: "News", path: "/news", emoji: "📰" },
+  { label: "Chat", path: "/chat", emoji: "🤖" },
+  { label: "Search", path: "/search", emoji: "🔍" },
+  { label: "Calendar", path: "/", emoji: "📅" },
+  { label: "Drive", path: "/", emoji: "☁️" },
+  { label: "Translate", path: "/", emoji: "🌐" },
+  { label: "Photos", path: "/", emoji: "🖼️" },
+];
+
+interface HeaderProps {
+  showSearch?: boolean;
+  initialQuery?: string;
+  onSearch?: (query: string) => void;
+}
+
+export function Header({
+  showSearch = true,
+  initialQuery = "",
+  onSearch,
+}: HeaderProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [localQuery, setLocalQuery] = useState(initialQuery);
+  const [appsOpen, setAppsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const appsRef = useRef<HTMLDivElement>(null);
+
+  const isSearchPage = location.pathname === "/search";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    setLocalQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (appsRef.current && !appsRef.current.contains(e.target as Node)) {
+        setAppsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleNavClick = (href: string) => {
-    setOpen(false);
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" && localQuery.trim()) {
+      onSearch?.(localQuery);
+      if (!isSearchPage) {
+        navigate({ to: "/search", search: { q: localQuery } });
+      }
+    }
+  }
+
+  function handleSubmit() {
+    if (localQuery.trim()) {
+      onSearch?.(localQuery);
+      if (!isSearchPage) {
+        navigate({ to: "/search", search: { q: localQuery } });
+      }
+    }
+  }
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
-        scrolled
-          ? "bg-card/95 backdrop-blur-md shadow-elevated border-b border-border"
-          : "bg-primary"
-      }`}
-    >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <button
-          type="button"
-          data-ocid="header.home_link"
-          onClick={() => handleNavClick("#home")}
-          className="flex items-center gap-2 group"
-          aria-label="Mumbai Clinic – Go to top"
+    <header className="sticky top-0 z-50 bg-background shadow-header">
+      <div className="flex items-center justify-between h-14 px-4 md:px-6 gap-4">
+        {/* Logo */}
+        <Link
+          to="/"
+          className="flex-shrink-0 flex items-center"
+          data-ocid="header.logo.link"
         >
-          <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-smooth ${
-              scrolled ? "bg-primary" : "bg-primary-foreground/20"
-            }`}
+          <span className="text-xl font-bold tracking-tight select-none">
+            <span className="text-g-blue">S</span>
+            <span className="text-g-red">e</span>
+            <span className="text-g-yellow">a</span>
+            <span className="text-g-blue">r</span>
+            <span className="text-g-green">c</span>
+            <span className="text-g-red">h</span>
+            <span className="text-g-dark">Sphere</span>
+          </span>
+        </Link>
+
+        {/* Search Bar — center */}
+        {showSearch && (
+          <div className="flex-1 max-w-[584px] hidden md:flex">
+            <div className="relative flex items-center w-full border border-g-border rounded-full hover:shadow-search-hover focus-within:shadow-search-hover transition-smooth bg-background px-4 py-2 gap-2">
+              <Search className="text-g-gray flex-shrink-0" size={18} />
+              <input
+                ref={inputRef}
+                type="text"
+                value={localQuery}
+                onChange={(e) => setLocalQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Search or type a URL"
+                className="flex-1 outline-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground min-w-0"
+                data-ocid="header.search_input"
+                aria-label="Search"
+              />
+              {localQuery && (
+                <button
+                  type="button"
+                  onClick={() => setLocalQuery("")}
+                  className="text-g-gray hover:text-foreground transition-smooth flex-shrink-0"
+                  aria-label="Clear search"
+                  data-ocid="header.clear_button"
+                >
+                  <X size={18} />
+                </button>
+              )}
+              <div className="w-px h-5 bg-border flex-shrink-0" />
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="text-g-blue hover:text-primary transition-smooth flex-shrink-0"
+                aria-label="Submit search"
+                data-ocid="header.search_submit_button"
+              >
+                <Search size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Right Nav */}
+        <div className="flex items-center gap-1">
+          {/* Desktop nav links */}
+          <nav
+            className="hidden md:flex items-center gap-1 mr-1"
+            aria-label="Main navigation"
           >
-            <Plus className="w-5 h-5 text-primary-foreground" strokeWidth={3} />
-          </div>
-          <div className="leading-tight">
-            <p
-              className={`font-display font-bold text-base leading-none transition-smooth ${
-                scrolled ? "text-foreground" : "text-primary-foreground"
-              }`}
-            >
-              Mumbai Clinic
-            </p>
-            <p
-              className={`text-[11px] leading-none mt-0.5 transition-smooth ${
-                scrolled
-                  ? "text-muted-foreground"
-                  : "text-primary-foreground/80"
-              }`}
-            >
-              {lang === "hi" ? "मुंबई क्लीनिक" : "Professional Medical"}
-            </p>
-          </div>
-        </button>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-sm text-g-gray hover:text-foreground nav-link-hover transition-smooth"
+                data-ocid={`header.${link.label.toLowerCase()}.link`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-        <nav
-          className="hidden md:flex items-center gap-1"
-          aria-label="Main navigation"
-        >
-          {navIds.map(({ key, href }) => (
+          {/* Apps grid dropdown */}
+          <div className="relative" ref={appsRef}>
             <button
-              key={key}
               type="button"
-              data-ocid={`nav.${key}_link`}
-              onClick={() => handleNavClick(href)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-smooth ${
-                scrolled
-                  ? "text-foreground hover:bg-muted hover:text-primary"
-                  : "text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10"
-              }`}
+              onClick={() => setAppsOpen(!appsOpen)}
+              className="p-2 rounded-full nav-link-hover text-g-gray hover:text-foreground transition-smooth"
+              aria-label="All apps"
+              data-ocid="header.apps_grid.button"
             >
-              {t.nav[key]}
+              <Grid3X3 size={20} />
             </button>
-          ))}
-        </nav>
+            {appsOpen && (
+              <div
+                className="absolute right-0 top-12 w-72 bg-background border border-border rounded-2xl shadow-elevated p-4 z-50 animate-fade-in"
+                data-ocid="header.apps_grid.popover"
+              >
+                <p className="text-xs text-muted-foreground font-medium mb-3 px-1">
+                  Apps
+                </p>
+                <div className="grid grid-cols-3 gap-1">
+                  {ALL_APPS.map((app) => (
+                    <Link
+                      key={app.label}
+                      to={app.path}
+                      onClick={() => setAppsOpen(false)}
+                      className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-muted transition-smooth cursor-pointer"
+                      data-ocid={`header.app.${app.label.toLowerCase()}.link`}
+                    >
+                      <span className="text-2xl">{app.emoji}</span>
+                      <span className="text-xs text-foreground">
+                        {app.label}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">
+          {/* User avatar */}
           <button
             type="button"
-            data-ocid="header.lang_toggle"
-            onClick={toggleLang}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-smooth ${
-              scrolled
-                ? "border-border text-foreground hover:bg-muted"
-                : "border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
-            }`}
-            aria-label="Toggle language"
+            className="w-8 h-8 rounded-full bg-g-blue text-white text-sm font-semibold flex items-center justify-center ml-1 hover:shadow-elevated transition-smooth flex-shrink-0"
+            aria-label="User account"
+            data-ocid="header.user_avatar.button"
           >
-            EN | हिं
+            U
           </button>
 
-          <a
-            href="tel:+918080713636"
-            data-ocid="header.call_button"
-            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-smooth ${
-              scrolled
-                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"
-            }`}
-          >
-            <Phone className="w-3.5 h-3.5" />
-            Call Us
-          </a>
-
-          <Sheet open={open} onOpenChange={setOpen}>
+          {/* Mobile menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                data-ocid="header.menu_button"
-                className={`md:hidden transition-smooth ${
-                  scrolled
-                    ? "text-foreground"
-                    : "text-primary-foreground hover:bg-primary-foreground/10"
-                }`}
+                className="md:hidden"
                 aria-label="Open menu"
+                data-ocid="header.mobile_menu.button"
               >
-                <Menu className="w-5 h-5" />
+                <Menu size={20} />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-72 bg-card"
-              data-ocid="header.mobile_drawer"
+              className="w-64 pt-8"
+              data-ocid="header.mobile_menu.sheet"
             >
-              <div className="flex flex-col h-full">
-                <div className="flex items-center gap-2 pb-6 border-b border-border">
-                  <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-                    <Plus
-                      className="w-5 h-5 text-primary-foreground"
-                      strokeWidth={3}
+              <div className="flex flex-col gap-1">
+                {showSearch && (
+                  <div className="flex items-center border border-g-border rounded-full px-3 py-2 gap-2 mb-4">
+                    <Search className="text-g-gray" size={16} />
+                    <input
+                      type="text"
+                      value={localQuery}
+                      onChange={(e) => setLocalQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Search"
+                      className="flex-1 outline-none text-sm text-foreground placeholder:text-muted-foreground bg-transparent"
+                      data-ocid="header.mobile_search_input"
                     />
                   </div>
-                  <div>
-                    <p className="font-display font-bold text-foreground">
-                      Mumbai Clinic
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Dr. Atul Mashru
-                    </p>
-                  </div>
-                </div>
-                <nav className="flex flex-col gap-1 mt-6">
-                  {navIds.map(({ key, href }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      data-ocid={`mobile_nav.${key}_link`}
-                      onClick={() => handleNavClick(href)}
-                      className="text-left px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-muted hover:text-primary transition-smooth"
-                    >
-                      {t.nav[key]}
-                    </button>
-                  ))}
-                </nav>
-                <div className="mt-auto pt-6 border-t border-border">
-                  <a
-                    href="tel:+918080713636"
-                    data-ocid="mobile_nav.call_button"
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium text-sm transition-smooth hover:bg-primary/90"
+                )}
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-3 py-3 rounded-lg text-sm text-foreground hover:bg-muted transition-smooth"
+                    data-ocid={`header.mobile.${link.label.toLowerCase()}.link`}
                   >
-                    <Phone className="w-4 h-4" />
-                    +91 80807 13636
-                  </a>
-                </div>
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </SheetContent>
           </Sheet>

@@ -89,10 +89,29 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface ChatMessage {
+    content: string;
+    role: string;
+}
 export interface backendInterface {
+    sendChatMessage(messages: Array<ChatMessage>): Promise<string>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async sendChatMessage(arg0: Array<ChatMessage>): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.sendChatMessage(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.sendChatMessage(arg0);
+            return result;
+        }
+    }
 }
 export interface CreateActorOptions {
     agent?: Agent;
